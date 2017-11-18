@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 import time
 
 import numpy as np
@@ -24,7 +25,7 @@ def conv(input_data, kernel, biases, k_h, k_w, c_o, s_h, s_w, padding="VALID", g
         conv = tf.concat(output_groups, 3)
     return tf.reshape(tf.nn.bias_add(conv, biases), [-1] + conv.get_shape().as_list()[1:])
 
-def get_decaf_tensor(x, weights_path="bvlc_alexnet.npy"):
+def get_decaf_tensor(x, weights_path=os.path.join(os.path.dirname(__file__), "bvlc_alexnet.npy")):
     # load weights
     net_data = np.load(open(weights_path, "rb"), encoding="latin1").item()
 
