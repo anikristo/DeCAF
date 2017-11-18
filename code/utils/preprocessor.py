@@ -17,7 +17,7 @@ import random
 
 import numpy as np
 from enum import Enum
-from scipy.misc import imread
+from scipy.misc import imread, imresize
 
 
 class Dataset(Enum):
@@ -82,6 +82,8 @@ class Preprocessor:
             if os.path.isdir(caltech_101_path + "/" + subdir):
                 labels.append(subdir)
 
+        label_encodings = dict(map(lambda t: (t[1], t[0]), enumerate(set(labels))))
+
         data = []  # List of tuples of the form (label, image_path)
         for lbl in labels:
             class_path = caltech_101_path + "/" + lbl
@@ -89,14 +91,16 @@ class Preprocessor:
             # Collect image paths
             for img_filename in os.listdir(class_path):
                 data.append(
-                    (lbl, class_path + "/" + img_filename))  # Appends a tuple of (label, image_path)
+                    (label_encodings[lbl], class_path + "/" + img_filename))  # Appends a tuple of (label, image_path)
+
+
 
         # Shuffle data
         data_sz = len(data)
         random.shuffle(data)
 
         # Split data into training, validation and test set in 60-20-20 ratio
-        train_sz = int(data_sz * .6)
+        train_sz = int(data_sz * .7)
         validation_sz = int(data_sz * .2)
         test_sz = data_sz - (train_sz + validation_sz)
 
@@ -104,17 +108,17 @@ class Preprocessor:
         validation_set = data[train_sz: train_sz + validation_sz]
         test_set = data[train_sz + validation_sz:]
 
-        for idx in range(0, data_sz, self._batch_sz):
-            if idx + self._batch_sz <= data_sz:
-                train_batch = np.asarray(
-                    list(map(lambda x: self._read_image(x[1]), train_set[idx: idx + self._batch_sz])))
-                validation_batch = np.asarray(
-                    list(map(lambda x: self._read_image(x[1]), validation_set[idx: idx + self._batch_sz])))
-                test_batch = np.asarray(
-                    list(map(lambda x: self._read_image(x[1]), test_set[idx: idx + self._batch_sz])))
+        def get_batch(data_set):
+            data_sz = len(data_set)
+            for idx in range(0, data_sz, self._batch_sz):
+                if idx + self._batch_sz <= data_sz:
+                    data_batch = np.asarray(
+                    list(map(lambda x: self._read_image(x[1]), data_set[idx: idx + self._batch_sz])))
+                    labels_batch = np.asarray(
+                    list(map(lambda x: x[0], data_set[idx: idx + self._batch_sz])))
+                    yield (data_batch, labels_batch)
 
-                res = np.stack((train_batch, validation_batch, test_batch), axis=0)  # First dimension: Batch Size
-                yield res
+        return get_batch(train_set), get_batch(validation_set), get_batch(test_set), label_encodings
 
     def _read_image(self, path):
         """
@@ -125,6 +129,7 @@ class Preprocessor:
         """
 
         image = imread(path)
+        image = imresize(image, size=(227, 227))
         is_grayscale = image.ndim == 2
 
         if is_grayscale:
