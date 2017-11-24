@@ -8,7 +8,7 @@ import tensorflow as tf
 import numpy as np
 
 from utils import decaf
-from utils import preprocessor
+from utils import dataset
 
 class Task(object):
 
@@ -32,9 +32,8 @@ class ObjectRecognitionTask(Task):
 
     def __init__(self):
         super(ObjectRecognitionTask, self).__init__()
-        # define data
-        self.preprocessor = preprocessor.Preprocessor(preprocessor.Dataset.DATASET_CALTECH_101)
-        self.train_batch_iter, self.validation_batch_iter, self.test_batch_iter, self.labels = self.preprocessor.next_batch()
+        # define dataset
+        self.dataset = dataset.Caltech101Dataset()
 
         # define model
         from sklearn import linear_model
@@ -42,10 +41,10 @@ class ObjectRecognitionTask(Task):
 
     def train(self):
         idx = 1
-        for (train_data, train_labels) in self.train_batch_iter:
+        for (train_data, train_labels) in self.dataset.get_train_batch_iter():
             print idx
             train_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: train_data})
-            self.model.partial_fit(train_decaf_data, train_labels, classes=self.labels.values())
+            self.model.partial_fit(train_decaf_data, train_labels, classes=self.dataset.get_labels())
             idx += 1
 
         print 'Train: done!'
@@ -53,7 +52,7 @@ class ObjectRecognitionTask(Task):
     def test(self):
         from sklearn.metrics import accuracy_score
         scores = []
-        for (test_data, test_labels) in self.test_batch_iter:
+        for (test_data, test_labels) in self.dataset.get_test_batch_iter():
             test_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: test_data})
             test_predictions = self.model.predict(test_decaf_data)
             scores.append(accuracy_score(test_labels, test_predictions))
