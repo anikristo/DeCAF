@@ -8,7 +8,7 @@ import tensorflow as tf
 import numpy as np
 
 from utils import decaf
-from utils import dataset
+import dataset
 
 class Task(object):
 
