@@ -2,12 +2,13 @@
 
 import os
 import random
+
 import numpy as np
 
 from dataset import Dataset
 
-class Caltech101Dataset(Dataset):
 
+class Caltech101Dataset(Dataset):
     def __init__(self, batch_size=20, dataset_dir=os.path.join("../datasets", "Caltech-101")):
         self.batch_size = batch_size
 
@@ -25,7 +26,8 @@ class Caltech101Dataset(Dataset):
             # Collect image paths
             for img_filename in os.listdir(class_path):
                 data.append(
-                    (label_encodings[lbl], os.path.join(class_path, img_filename)))  # Appends a tuple of (label, image_path)
+                    (label_encodings[lbl],
+                     os.path.join(class_path, img_filename)))  # Appends a tuple of (label, image_path)
 
         # Shuffle data
         data_size = len(data)
@@ -45,9 +47,9 @@ class Caltech101Dataset(Dataset):
             for idx in range(0, data_size, self.batch_size):
                 if idx + self.batch_size <= data_size:
                     data_batch = np.asarray(
-                    list(map(lambda x: self._read_image(x[1]), data_set[idx: idx + self.batch_size])))
+                        list(map(lambda x: self._read_image(x[1]), data_set[idx: idx + self.batch_size])))
                     labels_batch = np.asarray(
-                    list(map(lambda x: x[0], data_set[idx: idx + self.batch_size])))
+                        list(map(lambda x: x[0], data_set[idx: idx + self.batch_size])))
                     yield (data_batch, labels_batch)
 
         self.train_batch_iter = get_batch(train_set)
