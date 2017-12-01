@@ -26,6 +26,7 @@ class Dataset(object):
 
     def _read_image(self, image_path):
         image = imread(image_path)
+        #print image.shape, image_path
         image = imresize(image, size=(227, 227))
         is_grayscale = image.ndim == 2
 
