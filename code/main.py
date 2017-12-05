@@ -23,9 +23,7 @@ if __name__ == "__main__":
 #     domain_adaptation_task.test()
 # =============================================================================
     
-    #BIRDS
-    
-    
+    #BIRDS    
     scene_recognition_task = SceneObjectRecognitionTask()
     scene_recognition_task.train()
     scene_recognition_task.test()

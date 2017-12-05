@@ -26,15 +26,29 @@ class SUN397Dataset(Dataset):
 
         label_encodings = dict(map(lambda t: (t[1], t[0]), enumerate(set(labels))))
 
-        data = []  # List of tuples of the form (label, image_path)
+         # List of tuples of the form (label, image_path)
+         
+        train_set = []
+        test_set = []
         for lbl in labels:
             class_path = os.path.join(dataset_dir, lbl)
-
+            data_buffer = [] 
             # Collect image paths
             for img_filename in os.listdir(class_path):
-                data.append(
-                    (label_encodings[lbl], os.path.join(class_path, img_filename)))  # Appends a tuple of (label, image_path)
-                
+                if len(data_buffer) < 100:
+                    data_buffer.append(
+                        (label_encodings[lbl], os.path.join(class_path, img_filename)))  # Appends a tuple of (label, image_path)
+                else:
+                    random.shuffle(data_buffer)
+                    train_set.extend(data_buffer[:50])
+                    test_set.extend(data_buffer[50:])
+                    #print len(train_set), len(test_set)
+                    #print("PROVA", train_set)
+                    break
+                    
+                    
+        random.shuffle(train_set)
+        random.shuffle(test_set)
                 
 # =============================================================================
 #             for img_filename in os.listdir(class_path):
@@ -48,18 +62,20 @@ class SUN397Dataset(Dataset):
 #                     os.rename(image_path, os.path.join("/home/aalto/2470/dl/CS2470-project/datasets/SUN397/junk", img_filename))
 # =============================================================================
 
-        # Shuffle data
-        data_size = len(data)
-        random.shuffle(data)
-
-        # Split data into training, validation and test set in 60-20-20 ratio
-        train_size = int(data_size * .7)
-        validation_size = int(data_size * .2)
-        test_size = data_size - (train_size + validation_size)
-
-        train_set = data[:train_size]
-        validation_set = data[train_size:train_size + validation_size]
-        test_set = data[train_size + validation_size:]
+# =============================================================================
+#         # Shuffle data
+#         data_size = len(data)
+#         random.shuffle(data)
+# 
+#         # Split data into training, validation and test set in 60-20-20 ratio
+#         train_size = int(data_size * .7)
+#         validation_size = int(data_size * .2)
+#         test_size = data_size - (train_size + validation_size)
+# 
+#         train_set = data[:train_size]
+#         validation_set = data[train_size:train_size + validation_size]
+#         test_set = data[train_size + validation_size:]
+# =============================================================================
 
         def get_batch(data_set):
             data_size = len(data_set)
@@ -72,7 +88,7 @@ class SUN397Dataset(Dataset):
                     yield (data_batch, labels_batch)
 
         self.train_batch_iter = get_batch(train_set)
-        self.validation_batch_iter = get_batch(validation_set)
+        #self.validation_batch_iter = get_batch(validation_set)
         self.test_batch_iter = get_batch(test_set)
         self.labels = label_encodings.values()
 
