@@ -42,8 +42,6 @@ class SUN397Dataset(Dataset):
                     random.shuffle(data_buffer)
                     train_set.extend(data_buffer[:50])
                     test_set.extend(data_buffer[50:])
-                    #print len(train_set), len(test_set)
-                    #print("PROVA", train_set)
                     break
                     
                     
@@ -60,9 +58,7 @@ class SUN397Dataset(Dataset):
 #                         (label_encodings[lbl], image_path))  # Appends a tuple of (label, image_path)
 #                 else:
 #                     os.rename(image_path, os.path.join("/home/aalto/2470/dl/CS2470-project/datasets/SUN397/junk", img_filename))
-# =============================================================================
-
-# =============================================================================
+# 
 #         # Shuffle data
 #         data_size = len(data)
 #         random.shuffle(data)
