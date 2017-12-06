@@ -47,7 +47,7 @@ class Caltech101Dataset(Dataset):
             for idx in range(0, data_size, self.batch_size):
                 if idx + self.batch_size <= data_size:
                     data_batch = np.asarray(
-                        list(map(lambda x: self._read_image(x[1]), data_set[idx: idx + self.batch_size])))
+                        list(map(lambda x: Dataset._read_image(x[1]), data_set[idx: idx + self.batch_size])))
                     labels_batch = np.asarray(
                         list(map(lambda x: x[0], data_set[idx: idx + self.batch_size])))
                     yield (data_batch, labels_batch)

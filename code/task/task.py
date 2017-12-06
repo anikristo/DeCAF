@@ -42,12 +42,12 @@ class ObjectRecognitionTask(Task):
         self.model = linear_model.SGDClassifier()
 
     def train(self):
-        idx = 1
+        # idx = 1
         for (train_data, train_labels) in self.dataset.get_train_batch_iter():
-            print idx
+            # print idx
             train_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: train_data})
             self.model.partial_fit(train_decaf_data, train_labels, classes=self.dataset.get_labels())
-            idx += 1
+            # idx += 1
 
         print 'Train: done!'
 
@@ -67,7 +67,7 @@ class DomainAdaptationTask(Task):
         super(DomainAdaptationTask, self).__init__()
         # define dataset. domains = {0: "amazon", 1: "dslr", 2: "webcam"}
 
-        print("Transfering from", origin_domain, "to", target_domain)
+        print "Transfering from " + origin_domain + " to " + target_domain
         if combo == "S":
             self.origin_domain_dataset = dataset.OfficeDataset(domain=origin_domain, split=[1, 0, 0])
             self.target_domain_dataset = dataset.OfficeDataset(domain=target_domain, split=[0, 0, 1])
@@ -84,21 +84,21 @@ class DomainAdaptationTask(Task):
     def train(self):
 
         if "S" in self.combo:
-            idx = 1
+            # idx = 1
             for (train_data, train_labels) in self.origin_domain_dataset.get_train_batch_iter():
-                print("Origin Domain Train", idx)
+                # print("Origin Domain Train", idx)
                 train_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: train_data})
                 self.model.partial_fit(train_decaf_data, train_labels, classes=self.origin_domain_dataset.get_labels())
-                idx += 1
+                # idx += 1
 
         if "T" in self.combo:
             print "Origin Domain Train: done!"
-            idx = 1
+            # idx = 1
             for (train_data, train_labels) in self.target_domain_dataset.get_train_batch_iter():
-                print("Target Domain Train", idx)
+                # print("Target Domain Train", idx)
                 train_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: train_data})
                 self.model.partial_fit(train_decaf_data, train_labels, classes=self.target_domain_dataset.get_labels())
-                idx += 1
+                # idx += 1
 
             print "Target Domain Train: done!"
         print 'Train: done!'
@@ -125,26 +125,26 @@ class SubcategoryRecognitionTask(Task):
         from sklearn import linear_model
         self.model = linear_model.SGDClassifier()  # TODO Cross check here
 
-    def train(self): # TODO
-      idx = 1
-      for (train_data, train_labels) in self.dataset.get_train_batch_iter():
-          print idx
-          train_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: train_data})
-          self.model.partial_fit(train_decaf_data, train_labels, classes=self.dataset.get_labels())
-          idx += 1
-      print 'Train: done!'
-        
-    def test(self): # TODO
-      from sklearn.metrics import accuracy_score
-      scores = []
-      for (test_data, test_labels) in self.dataset.get_test_batch_iter():
-          test_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: test_data})
-          test_predictions = self.model.predict(test_decaf_data)
-          scores.append(accuracy_score(test_labels, test_predictions))
-      print 'Accuracy: {}'.format(np.average(scores))
-      print 'Test: done!'
+    def train(self):  # TODO
+        # idx = 1
+        for (train_data, train_labels) in self.dataset.get_train_batch_iter():
+            # print idx
+            train_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: train_data})
+            self.model.partial_fit(train_decaf_data, train_labels, classes=self.dataset.get_labels())
+            # idx += 1
+        print 'Train: done!'
 
-        
+    def test(self):  # TODO
+        from sklearn.metrics import accuracy_score
+        scores = []
+        for (test_data, test_labels) in self.dataset.get_test_batch_iter():
+            test_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: test_data})
+            test_predictions = self.model.predict(test_decaf_data)
+            scores.append(accuracy_score(test_labels, test_predictions))
+        print 'Accuracy: {}'.format(np.average(scores))
+        print 'Test: done!'
+
+
 class SceneObjectRecognitionTask(Task):
 
     def __init__(self):
@@ -157,12 +157,12 @@ class SceneObjectRecognitionTask(Task):
         self.model = linear_model.SGDClassifier()
 
     def train(self):
-        idx = 1
+        # idx = 1
         for (train_data, train_labels) in self.dataset.get_train_batch_iter():
-            print idx
+            # print idx
             train_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: train_data})
             self.model.partial_fit(train_decaf_data, train_labels, classes=self.dataset.get_labels())
-            idx += 1
+            # idx += 1
         print 'Train: done!'
 
     def test(self):

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from abc import abstractmethod, ABCMeta
+
 import numpy as np
 from scipy.misc import imread, imresize
 
 
 class Dataset(object):
-
     __metaclass__ = ABCMeta
 
     @abstractmethod
@@ -25,12 +25,10 @@ class Dataset(object):
     def get_labels(self):
         pass
 
-    def _read_image(self, image_path, bounding_box=None):
+    @staticmethod
+    def _read_image(image_path, bounding_box=None):
         image = imread(image_path)
-        
-        #print image.shape, image_path
-        image = imresize(image, size=(227, 227))
-        
+
         is_grayscale = image.ndim == 2
         if is_grayscale:
             image = np.tile(image[:, :, np.newaxis], (1, 1, 3))
@@ -40,7 +38,7 @@ class Dataset(object):
             image = image[:, :, :3]  # Remove the alpha layer
 
         if bounding_box is not None:
-            image = self._crop_image(image, bounding_box)
+            image = Dataset._crop_image(image, bounding_box)
 
         image = imresize(image, size=(227, 227))  # TODO maybe use crop
 
@@ -52,7 +50,8 @@ class Dataset(object):
 
         return image
 
-    def _crop_image(self, image, box):
+    @staticmethod
+    def _crop_image(image, box):
         imheight, imwidth = image.shape[:2]
         x, y, width, height = box
         centerx = x + width / 2.
