@@ -27,7 +27,10 @@ class Dataset(object):
 
     def _read_image(self, image_path, bounding_box=None):
         image = imread(image_path)
-
+        
+        #print image.shape, image_path
+        image = imresize(image, size=(227, 227))
+        
         is_grayscale = image.ndim == 2
         if is_grayscale:
             image = np.tile(image[:, :, np.newaxis], (1, 1, 3))
