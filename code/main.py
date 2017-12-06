@@ -2,7 +2,7 @@
 
 import time
 
-from task.task import ObjectRecognitionTask, DomainAdaptationTask, SceneObjectRecognitionTask
+from task.task import ObjectRecognitionTask, DomainAdaptationTask, SubcategoryRecognitionTask, SceneObjectRecognitionTask
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -39,9 +39,12 @@ if __name__ == "__main__":
     domain_adaptation_task.train()
     domain_adaptation_task.test()
     
-    #SUBDOMAIN
+    #SUBCATEGORY RECOGNITION - BIRDS
+    subcategory_recognition_task = SubcategoryRecognitionTask()
+    subcategory_recognition_task.train()
+    subcategory_recognition_task.test()
     
-    #SCENE RECOGNITION - BIRDS    
+    #SCENE RECOGNITION - SUN    
     scene_recognition_task = SceneObjectRecognitionTask()
     scene_recognition_task.train()
     scene_recognition_task.test()

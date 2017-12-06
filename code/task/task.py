@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import sys, os
+import os
+import sys
+
 sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
 
 from abc import abstractmethod, ABCMeta
@@ -10,8 +12,8 @@ import numpy as np
 from utils import decaf
 import dataset
 
-class Task(object):
 
+class Task(object):
     __metaclass__ = ABCMeta
 
     def __init__(self):
@@ -28,8 +30,8 @@ class Task(object):
     def test(self):
         pass
 
-class ObjectRecognitionTask(Task):
 
+class ObjectRecognitionTask(Task):
     def __init__(self):
         super(ObjectRecognitionTask, self).__init__()
         # define dataset
@@ -58,22 +60,21 @@ class ObjectRecognitionTask(Task):
             scores.append(accuracy_score(test_labels, test_predictions))
         print 'Accuracy: {}'.format(np.average(scores))
         print 'Test: done!'
-        
-        
-class DomainAdaptationTask(Task):
 
+
+class DomainAdaptationTask(Task):
     def __init__(self, origin_domain, target_domain, combo):
         super(DomainAdaptationTask, self).__init__()
         # define dataset. domains = {0: "amazon", 1: "dslr", 2: "webcam"}
-        
+
         print("Transfering from", origin_domain, "to", target_domain)
         if combo == "S":
-            self.origin_domain_dataset = dataset.OfficeDataset(domain = origin_domain, split=[1,0,0])
-            self.target_domain_dataset = dataset.OfficeDataset(domain = target_domain, split=[0, 0, 1])
+            self.origin_domain_dataset = dataset.OfficeDataset(domain=origin_domain, split=[1, 0, 0])
+            self.target_domain_dataset = dataset.OfficeDataset(domain=target_domain, split=[0, 0, 1])
         else:
-            self.origin_domain_dataset = dataset.OfficeDataset(domain = origin_domain, split=[1,0,0])
-            self.target_domain_dataset = dataset.OfficeDataset(domain = target_domain, split=[0.3, 0, 0.7])
-            
+            self.origin_domain_dataset = dataset.OfficeDataset(domain=origin_domain, split=[1, 0, 0])
+            self.target_domain_dataset = dataset.OfficeDataset(domain=target_domain, split=[0.3, 0, 0.7])
+
         self.combo = combo
 
         # define model
@@ -81,7 +82,7 @@ class DomainAdaptationTask(Task):
         self.model = linear_model.SGDClassifier()
 
     def train(self):
-        
+
         if "S" in self.combo:
             idx = 1
             for (train_data, train_labels) in self.origin_domain_dataset.get_train_batch_iter():
@@ -89,7 +90,7 @@ class DomainAdaptationTask(Task):
                 train_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: train_data})
                 self.model.partial_fit(train_decaf_data, train_labels, classes=self.origin_domain_dataset.get_labels())
                 idx += 1
-        
+
         if "T" in self.combo:
             print "Origin Domain Train: done!"
             idx = 1
@@ -98,7 +99,7 @@ class DomainAdaptationTask(Task):
                 train_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: train_data})
                 self.model.partial_fit(train_decaf_data, train_labels, classes=self.target_domain_dataset.get_labels())
                 idx += 1
-                
+
             print "Target Domain Train: done!"
         print 'Train: done!'
 
@@ -111,7 +112,38 @@ class DomainAdaptationTask(Task):
             scores.append(accuracy_score(test_labels, test_predictions))
         print 'Accuracy: {}'.format(np.average(scores))
         print 'Test: done!'
+
+
+class SubcategoryRecognitionTask(Task):
+    def __init__(self):
+        super(SubcategoryRecognitionTask, self).__init__()
+
+        # define dataset
+        self.dataset = dataset.BirdsDataset()
+
+        # define model
+        from sklearn import linear_model
+        self.model = linear_model.SGDClassifier()  # TODO Cross check here
+
+    def train(self): # TODO
+      idx = 1
+      for (train_data, train_labels) in self.dataset.get_train_batch_iter():
+          print idx
+          train_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: train_data})
+          self.model.partial_fit(train_decaf_data, train_labels, classes=self.dataset.get_labels())
+          idx += 1
+      print 'Train: done!'
         
+    def test(self): # TODO
+      from sklearn.metrics import accuracy_score
+      scores = []
+      for (test_data, test_labels) in self.dataset.get_test_batch_iter():
+          test_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: test_data})
+          test_predictions = self.model.predict(test_decaf_data)
+          scores.append(accuracy_score(test_labels, test_predictions))
+      print 'Accuracy: {}'.format(np.average(scores))
+      print 'Test: done!'
+
         
 class SceneObjectRecognitionTask(Task):
 
@@ -131,7 +163,6 @@ class SceneObjectRecognitionTask(Task):
             train_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: train_data})
             self.model.partial_fit(train_decaf_data, train_labels, classes=self.dataset.get_labels())
             idx += 1
-
         print 'Train: done!'
 
     def test(self):

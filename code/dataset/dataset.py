@@ -4,6 +4,7 @@ from abc import abstractmethod, ABCMeta
 import numpy as np
 from scipy.misc import imread, imresize
 
+
 class Dataset(object):
 
     __metaclass__ = ABCMeta
@@ -24,23 +25,46 @@ class Dataset(object):
     def get_labels(self):
         pass
 
-    def _read_image(self, image_path):
+    def _read_image(self, image_path, bounding_box=None):
         image = imread(image_path)
+        
         #print image.shape, image_path
         image = imresize(image, size=(227, 227))
+        
         is_grayscale = image.ndim == 2
-
         if is_grayscale:
-            image = np.stack((
-                image,
-                np.zeros(shape=image.shape, dtype=np.float32),
-                np.zeros(shape=image.shape, dtype=np.float32)),
-                axis=2)  # Add zeros for the third channel
+            image = np.tile(image[:, :, np.newaxis], (1, 1, 3))
+
+        has_transparency = image.shape[2] == 4
+        if has_transparency:
+            image = image[:, :, :3]  # Remove the alpha layer
+
+        if bounding_box is not None:
+            image = self._crop_image(image, bounding_box)
+
+        image = imresize(image, size=(227, 227))  # TODO maybe use crop
 
         image = image.astype(np.float32)
         image -= np.mean(image)  # Normalize values
 
         if not is_grayscale:  # NOTE: Switching doesn't make sense for grayscale images
-            image[:, :, 2], image[:, :, 0] = image[:, :, 0], image[:, :, 2]  # Switch to BGR space
+            image[:, :, 2], image[:, :, 0] = image[:, :, 0], image[:, :, 2]  # BGR space for compatibility with OpenCV
 
         return image
+
+    def _crop_image(self, image, box):
+        imheight, imwidth = image.shape[:2]
+        x, y, width, height = box
+        centerx = x + width / 2.
+        centery = y + height / 2.
+        xoffset = width / 2.
+        yoffset = height / 2.
+        xmin = max(int(centerx - xoffset + 0.5), 0)
+        ymin = max(int(centery - yoffset + 0.5), 0)
+        xmax = min(int(centerx + xoffset + 0.5), imwidth - 1)
+        ymax = min(int(centery + yoffset + 0.5), imheight - 1)
+        if xmax - xmin <= 0 or ymax - ymin <= 0:
+            raise ValueError("The cropped bounding box has size 0.")
+        return image[ymin:ymax, xmin:xmax]
+
+        # TODO Crop to dimensions without imresize

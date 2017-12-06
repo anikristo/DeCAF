@@ -2,16 +2,17 @@
 
 import os
 import random
+
 import numpy as np
 
 from dataset import Dataset
 
+
 class OfficeDataset(Dataset):
-    
     def __init__(self, domain, split, batch_size=20, dataset_dir=os.path.join("../datasets", "Office")):
         self.batch_size = batch_size
-        
-        dataset_dir = os.path.join(dataset_dir, domain+"/images")
+
+        dataset_dir = os.path.join(dataset_dir, domain + "/images")
         labels = []
         for subdir in os.listdir(dataset_dir):
             if os.path.isdir(os.path.join(dataset_dir, subdir)):
@@ -26,7 +27,8 @@ class OfficeDataset(Dataset):
             # Collect image paths
             for img_filename in os.listdir(class_path):
                 data.append(
-                    (label_encodings[lbl], os.path.join(class_path, img_filename)))  # Appends a tuple of (label, image_path)
+                    (label_encodings[lbl],
+                     os.path.join(class_path, img_filename)))  # Appends a tuple of (label, image_path)
 
         # Shuffle data
         data_size = len(data)
@@ -46,9 +48,9 @@ class OfficeDataset(Dataset):
             for idx in range(0, data_size, self.batch_size):
                 if idx + self.batch_size <= data_size:
                     data_batch = np.asarray(
-                    list(map(lambda x: self._read_image(x[1]), data_set[idx: idx + self.batch_size])))
+                        list(map(lambda x: self._read_image(x[1]), data_set[idx: idx + self.batch_size])))
                     labels_batch = np.asarray(
-                    list(map(lambda x: x[0], data_set[idx: idx + self.batch_size])))
+                        list(map(lambda x: x[0], data_set[idx: idx + self.batch_size])))
                     yield (data_batch, labels_batch)
 
         self.train_batch_iter = get_batch(train_set)
