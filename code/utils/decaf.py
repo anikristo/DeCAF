@@ -147,4 +147,4 @@ def get_decaf_tensor_7(x, weights_path=os.path.join(os.path.dirname(__file__), "
     fc7b = tf.Variable(net_data["fc7"][1])
     fc7 = tf.nn.relu_layer(fc6, fc7W, fc7b)
 
-    return fc7
+    return fc7, None

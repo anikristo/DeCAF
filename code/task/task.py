@@ -16,13 +16,10 @@ import dataset
 class Task(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, use_decaf_6=False):
+    def __init__(self, decaf_tensor_function):
         self.sess = tf.Session()
         self.input_tensor = tf.placeholder(tf.float32, (None, 227, 227, 3))
-        if use_decaf_6:
-            self.decaf_tensor, _ = decaf.get_decaf_tensor_6(self.input_tensor)
-        else:
-            self.decaf_tensor = decaf.get_decaf_tensor_7(self.input_tensor)
+        self.decaf_tensor, _ = decaf_tensor_function(self.input_tensor)
         self.sess.run(tf.global_variables_initializer())
 
     @abstractmethod
@@ -36,7 +33,10 @@ class Task(object):
 
 class ObjectRecognitionTask(Task):
     def __init__(self):
-        super(ObjectRecognitionTask, self).__init__()
+        super(ObjectRecognitionTask, self).__init__(decaf.get_decaf_tensor_6)
+
+        print "Running object recognition task"
+
         # define dataset
         self.dataset = dataset.Caltech101Dataset()
 
@@ -45,12 +45,9 @@ class ObjectRecognitionTask(Task):
         self.model = linear_model.SGDClassifier()
 
     def train(self):
-        # idx = 1
         for (train_data, train_labels) in self.dataset.get_train_batch_iter():
-            # print idx
             train_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: train_data})
             self.model.partial_fit(train_decaf_data, train_labels, classes=self.dataset.get_labels())
-            # idx += 1
 
         print 'Train: done!'
 
@@ -67,10 +64,13 @@ class ObjectRecognitionTask(Task):
 
 class DomainAdaptationTask(Task):
     def __init__(self, origin_domain, target_domain, combo):
-        super(DomainAdaptationTask, self).__init__()
-        # define dataset. domains = {0: "amazon", 1: "dslr", 2: "webcam"}
+        super(DomainAdaptationTask, self).__init__(decaf.get_decaf_tensor_6)
 
+        print "Running domain adaptation task"
+
+        # define dataset. domains = {0: "amazon", 1: "dslr", 2: "webcam"}
         print "Transfering from " + origin_domain + " to " + target_domain
+
         if combo == "S":
             self.origin_domain_dataset = dataset.OfficeDataset(domain=origin_domain, split=[1, 0, 0])
             self.target_domain_dataset = dataset.OfficeDataset(domain=target_domain, split=[0, 0, 1])
@@ -87,21 +87,15 @@ class DomainAdaptationTask(Task):
     def train(self):
 
         if "S" in self.combo:
-            # idx = 1
             for (train_data, train_labels) in self.origin_domain_dataset.get_train_batch_iter():
-                # print("Origin Domain Train", idx)
                 train_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: train_data})
                 self.model.partial_fit(train_decaf_data, train_labels, classes=self.origin_domain_dataset.get_labels())
-                # idx += 1
 
         if "T" in self.combo:
             print "Origin Domain Train: done!"
-            # idx = 1
             for (train_data, train_labels) in self.target_domain_dataset.get_train_batch_iter():
-                # print("Target Domain Train", idx)
                 train_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: train_data})
                 self.model.partial_fit(train_decaf_data, train_labels, classes=self.target_domain_dataset.get_labels())
-                # idx += 1
 
             print "Target Domain Train: done!"
         print 'Train: done!'
@@ -119,7 +113,9 @@ class DomainAdaptationTask(Task):
 
 class SubcategoryRecognitionTask(Task):
     def __init__(self):
-        super(SubcategoryRecognitionTask, self).__init__(True)
+        super(SubcategoryRecognitionTask, self).__init__(decaf.get_decaf_tensor_6)
+
+        print "Running subcategory recognition task"
 
         # define dataset
         self.dataset = dataset.BirdsDataset()
@@ -128,20 +124,20 @@ class SubcategoryRecognitionTask(Task):
         from sklearn import linear_model
         self.model = linear_model.LogisticRegression()
 
-    def train(self):  # TODO
-        # idx = 1
+    def train(self):
         all_train_data = []
         all_train_labels = []
+
         for (train_data, train_labels) in self.dataset.get_train_batch_iter():
-            # print idx
             train_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: train_data})
+
             all_train_data.extend(train_decaf_data)
             all_train_labels.extend(train_labels)
+
         self.model.fit(all_train_data, all_train_labels)
-            # idx += 1
         print 'Train: done!'
 
-    def test(self):  # TODO
+    def test(self):
         from sklearn.metrics import accuracy_score
         scores = []
         for (test_data, test_labels) in self.dataset.get_test_batch_iter():
@@ -155,21 +151,27 @@ class SubcategoryRecognitionTask(Task):
 class SceneObjectRecognitionTask(Task):
 
     def __init__(self):
-        super(SceneObjectRecognitionTask, self).__init__()
+        super(SceneObjectRecognitionTask, self).__init__(decaf.get_decaf_tensor_6)
+
+        print "Running scene recognition task"
+
         # define dataset
         self.dataset = dataset.SUN397Dataset()
 
         # define model
         from sklearn import linear_model
-        self.model = linear_model.SGDClassifier()
+        self.model = linear_model.LogisticRegression()
 
     def train(self):
-        # idx = 1
+        all_train_data = []
+        all_train_labels = []
         for (train_data, train_labels) in self.dataset.get_train_batch_iter():
-            # print idx
             train_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: train_data})
-            self.model.partial_fit(train_decaf_data, train_labels, classes=self.dataset.get_labels())
-            # idx += 1
+
+            all_train_data.extend(train_decaf_data)
+            all_train_labels.extend(train_labels)
+
+        self.model.fit(all_train_data, all_train_labels)
         print 'Train: done!'
 
     def test(self):

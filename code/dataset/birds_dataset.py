@@ -10,8 +10,7 @@ from dataset import Dataset
 
 # Code from: https://github.com/Yangqing/decaf/blob/86b39770476ab2865018ca976321ac1e99e286da/decaf/layers/data/cub.py
 class BirdsDataset(Dataset):
-    def __init__(self, batch_size=20, dataset_dir=os.path.join("../datasets", "Birds"), crop=None,
-                 target_size=(227, 227)):
+    def __init__(self, batch_size=20, dataset_dir=os.path.join("../datasets", "Birds")):
         self.batch_size = batch_size
 
         dataset_dir = os.path.join(dataset_dir, 'CUB_200_2011')
@@ -22,9 +21,6 @@ class BirdsDataset(Dataset):
                  open(os.path.join(dataset_dir, 'bounding_boxes.txt'), 'r')]
         labels = [int(line.split()[1]) - 1 for line in
                   open(os.path.join(dataset_dir, 'image_class_labels.txt'), 'r')]
-        bird_names = [line.split()[1] for line in
-                      open(os.path.join(dataset_dir, 'classes.txt'), 'r')]
-        name_to_id = dict(zip(bird_names, range(len(bird_names))))
         split = [int(line.split()[1]) for line in
                  open(os.path.join(dataset_dir, 'train_test_split.txt'), 'r')]
 
@@ -45,12 +41,6 @@ class BirdsDataset(Dataset):
         random.shuffle(train_set)
         random.shuffle(test_set)
 
-        # Split train and validation set
-        train_size = int(len(train_set) * .75)
-
-        validation_set = train_set[train_size:]
-        train_set = train_set[:train_size]
-
         def get_batch(data_set):
             data_size = len(data_set)
             for idx in range(0, data_size, self.batch_size):
@@ -62,7 +52,6 @@ class BirdsDataset(Dataset):
                     yield (data_batch, labels_batch)
 
         self.train_batch_iter = get_batch(train_set)
-        self.validation_batch_iter = get_batch(validation_set)
         self.test_batch_iter = get_batch(test_set)
         self.labels = list(set(labels))
 
@@ -70,7 +59,7 @@ class BirdsDataset(Dataset):
         return self.train_batch_iter
 
     def get_validation_batch_iter(self):
-        return self.validation_batch_iter
+        return None
 
     def get_test_batch_iter(self):
         return self.test_batch_iter
