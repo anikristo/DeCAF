@@ -19,7 +19,7 @@ class Task(object):
     def __init__(self):
         self.sess = tf.Session()
         self.input_tensor = tf.placeholder(tf.float32, (None, 227, 227, 3))
-        self.decaf_tensor = decaf.get_decaf_tensor(self.input_tensor)
+        self.decaf_tensor = decaf.get_decaf_tensor_7(self.input_tensor)
         self.sess.run(tf.global_variables_initializer())
 
     @abstractmethod

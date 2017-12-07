@@ -45,12 +45,14 @@ class Caltech101Dataset(Dataset):
         def get_batch(data_set):
             data_size = len(data_set)
             for idx in range(0, data_size, self.batch_size):
-                if idx + self.batch_size <= data_size:
-                    data_batch = np.asarray(
-                        list(map(lambda x: Dataset._read_image(x[1]), data_set[idx: idx + self.batch_size])))
-                    labels_batch = np.asarray(
-                        list(map(lambda x: x[0], data_set[idx: idx + self.batch_size])))
-                    yield (data_batch, labels_batch)
+                final_idx = min(idx + self.batch_size, data_size)
+                data_batch = np.asarray(list(map(lambda x: Dataset._read_image(x[1]), data_set[idx: final_idx])))
+                labels_batch = np.asarray(list(map(lambda x: x[0], data_set[idx: final_idx])))
+                yield (data_batch, labels_batch)
+
+        random.shuffle(train_set)
+        random.shuffle(validation_set)
+        random.shuffle(test_set)
 
         self.train_batch_iter = get_batch(train_set)
         self.validation_batch_iter = get_batch(validation_set)
