@@ -41,13 +41,17 @@ class ObjectRecognitionTask(Task):
         self.dataset = dataset.Caltech101Dataset()
 
         # define model
-        from sklearn import linear_model
-        self.model = linear_model.SGDClassifier()
+        from sklearn import svm
+        self.model = svm.LinearSVC()
 
     def train(self):
+        all_train_data = []
+        all_train_labels = []
         for (train_data, train_labels) in self.dataset.get_train_batch_iter():
             train_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: train_data})
-            self.model.partial_fit(train_decaf_data, train_labels, classes=self.dataset.get_labels())
+            all_train_data.extend(train_decaf_data)
+            all_train_labels.extend(train_labels)
+        self.model.fit(all_train_data, all_train_labels)
 
         print 'Train: done!'
 
@@ -81,21 +85,27 @@ class DomainAdaptationTask(Task):
         self.combo = combo
 
         # define model
-        from sklearn import linear_model
-        self.model = linear_model.SGDClassifier()
+        from sklearn import svm
+        self.model = svm.LinearSVC()
 
     def train(self):
 
+        all_train_data = []
+        all_train_labels = []
         if "S" in self.combo:
             for (train_data, train_labels) in self.origin_domain_dataset.get_train_batch_iter():
                 train_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: train_data})
-                self.model.partial_fit(train_decaf_data, train_labels, classes=self.origin_domain_dataset.get_labels())
+                all_train_data.extend(train_decaf_data)
+                all_train_labels.extend(train_labels)
+            self.model.fit(all_train_data, all_train_labels)
 
         if "T" in self.combo:
             print "Origin Domain Train: done!"
             for (train_data, train_labels) in self.target_domain_dataset.get_train_batch_iter():
                 train_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: train_data})
-                self.model.partial_fit(train_decaf_data, train_labels, classes=self.target_domain_dataset.get_labels())
+                all_train_data.extend(train_decaf_data)
+                all_train_labels.extend(train_labels)
+            self.model.fit(all_train_data, all_train_labels)
 
             print "Target Domain Train: done!"
         print 'Train: done!'
