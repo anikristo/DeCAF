@@ -16,10 +16,13 @@ import dataset
 class Task(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self):
+    def __init__(self, use_decaf_6=False):
         self.sess = tf.Session()
         self.input_tensor = tf.placeholder(tf.float32, (None, 227, 227, 3))
-        self.decaf_tensor = decaf.get_decaf_tensor_7(self.input_tensor)
+        if use_decaf_6:
+            self.decaf_tensor, _ = decaf.get_decaf_tensor_6(self.input_tensor)
+        else:
+            self.decaf_tensor = decaf.get_decaf_tensor_7(self.input_tensor)
         self.sess.run(tf.global_variables_initializer())
 
     @abstractmethod
@@ -116,21 +119,25 @@ class DomainAdaptationTask(Task):
 
 class SubcategoryRecognitionTask(Task):
     def __init__(self):
-        super(SubcategoryRecognitionTask, self).__init__()
+        super(SubcategoryRecognitionTask, self).__init__(True)
 
         # define dataset
         self.dataset = dataset.BirdsDataset()
 
         # define model
         from sklearn import linear_model
-        self.model = linear_model.SGDClassifier()  # TODO Cross check here
+        self.model = linear_model.LogisticRegression()
 
     def train(self):  # TODO
         # idx = 1
+        all_train_data = []
+        all_train_labels = []
         for (train_data, train_labels) in self.dataset.get_train_batch_iter():
             # print idx
             train_decaf_data = self.sess.run(self.decaf_tensor, feed_dict={self.input_tensor: train_data})
-            self.model.partial_fit(train_decaf_data, train_labels, classes=self.dataset.get_labels())
+            all_train_data.extend(train_decaf_data)
+            all_train_labels.extend(train_labels)
+        self.model.fit(all_train_data, all_train_labels)
             # idx += 1
         print 'Train: done!'
 
