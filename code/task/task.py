@@ -80,7 +80,7 @@ class DomainAdaptationTask(Task):
             self.target_domain_dataset = dataset.OfficeDataset(domain=target_domain, split=[0, 0, 1])
         else:
             self.origin_domain_dataset = dataset.OfficeDataset(domain=origin_domain, split=[1, 0, 0])
-            self.target_domain_dataset = dataset.OfficeDataset(domain=target_domain, split=[0.3, 0, 0.7])
+            self.target_domain_dataset = dataset.OfficeDataset(domain=target_domain, split=[0.19, 0, 0.81])
 
         self.combo = combo
 
