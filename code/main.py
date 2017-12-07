@@ -15,19 +15,19 @@ if __name__ == "__main__":
     object_recognition_task.test()
 
     # DOMAIN ADAPTATION - OFFICE
-    domain_adaptation_task = DomainAdaptationTask(origin_domain="amazon", target_domain="webcam", combo="T")
-    domain_adaptation_task.train()
-    domain_adaptation_task.test()
-
-    domain_adaptation_task = DomainAdaptationTask(origin_domain="dslr", target_domain="webcam", combo="T")
-    domain_adaptation_task.train()
-    domain_adaptation_task.test()
-
     domain_adaptation_task = DomainAdaptationTask(origin_domain="amazon", target_domain="webcam", combo="S")
     domain_adaptation_task.train()
     domain_adaptation_task.test()
 
     domain_adaptation_task = DomainAdaptationTask(origin_domain="dslr", target_domain="webcam", combo="S")
+    domain_adaptation_task.train()
+    domain_adaptation_task.test()
+
+    domain_adaptation_task = DomainAdaptationTask(origin_domain="amazon", target_domain="webcam", combo="T")
+    domain_adaptation_task.train()
+    domain_adaptation_task.test()
+
+    domain_adaptation_task = DomainAdaptationTask(origin_domain="dslr", target_domain="webcam", combo="T")
     domain_adaptation_task.train()
     domain_adaptation_task.test()
 
