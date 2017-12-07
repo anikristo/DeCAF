@@ -9,8 +9,9 @@ import tensorflow as tf
 # reference: https://github.com/guerzh/tf_weights
 
 def conv(input_data, kernel, biases, k_h, k_w, c_o, s_h, s_w, padding="VALID", group=1):
-    '''From https://github.com/ethereon/caffe-tensorflow
-    '''
+    """
+    From https://github.com/ethereon/caffe-tensorflow
+    """
     c_i = input_data.get_shape()[-1]
     assert c_i % group == 0
     assert c_o % group == 0

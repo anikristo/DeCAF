@@ -40,7 +40,7 @@ class Dataset(object):
         if bounding_box is not None:
             image = Dataset._crop_image(image, bounding_box)
 
-        image = imresize(image, size=(227, 227))  # TODO maybe use crop
+        image = imresize(image, size=(227, 227))
 
         image = image.astype(np.float32)
         image -= np.mean(image)  # Normalize values
@@ -65,5 +65,3 @@ class Dataset(object):
         if xmax - xmin <= 0 or ymax - ymin <= 0:
             raise ValueError("The cropped bounding box has size 0.")
         return image[ymin:ymax, xmin:xmax]
-
-        # TODO Crop to dimensions without imresize

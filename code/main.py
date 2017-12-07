@@ -8,7 +8,6 @@ from task.task import ObjectRecognitionTask, DomainAdaptationTask, SubcategoryRe
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 if __name__ == "__main__":
-
     # OBJECT RECOGNITION - CALTECH
     object_recognition_task = ObjectRecognitionTask()
     object_recognition_task.train()
