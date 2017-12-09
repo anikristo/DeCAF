@@ -1,8 +1,5 @@
 # Datasets
-To download the datasets in this folder:
-```bash
-scp -r <username>@ssh.cs.brown.edu:/home/akristo/course/cs1470/project/datasets/ .
-```
+The data is not included in git due to its enormous size. To download the datasets, use the links in the items below.
 
 ### **[Caltech 101 dataset](http://www.vision.caltech.edu/Image_Datasets/Caltech101/)** - _Object Recognition_
 
