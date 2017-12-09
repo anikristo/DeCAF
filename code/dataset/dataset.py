@@ -25,6 +25,7 @@ class Dataset(object):
     def get_labels(self):
         pass
 
+    # reference: https://github.com/Yangqing/decaf/blob/86b39770476ab2865018ca976321ac1e99e286da/decaf/layers/data/cub.py
     @staticmethod
     def _read_image(image_path, bounding_box=None):
         image = imread(image_path)

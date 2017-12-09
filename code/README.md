@@ -12,4 +12,4 @@ pip install -r requirements.txt
 
 # Other Files
 
-- [bvlc_alexnet.npy](http://www.cs.toronto.edu/~guerzhoy/tf_alexnet/bvlc_alexnet.npy)
+- [utils/bvlc_alexnet.npy](http://www.cs.toronto.edu/~guerzhoy/tf_alexnet/bvlc_alexnet.npy)
